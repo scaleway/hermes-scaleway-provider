@@ -1,0 +1,7 @@
+name: scaleway-provider
+kind: model-provider
+version: 1.0.0
+description: Scaleway Generative APIs — European OpenAI-compatible inference
+author: Reda Maizate
+requires_env:
+  - SCW_SECRET_KEY
