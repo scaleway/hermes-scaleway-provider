@@ -4,7 +4,7 @@ Use [Scaleway Generative APIs](https://www.scaleway.com/en/generative-apis/) mod
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) as a first-class provider: pick
 **Scaleway** in `hermes model`, or run `hermes chat --provider scaleway` (alias `scw`).
 
-An independent community plugin, not affiliated with Scaleway or NousResearch.
+Hosted by the Scaleway organization; not affiliated with NousResearch.
 
 ## Why a plugin?
 
@@ -31,7 +31,7 @@ Or straight from this repository at a reviewed commit — the plugin lives in th
 `scaleway-provider/` subdirectory, and `<full-commit-sha>` is the 40-character SHA you reviewed:
 
 ```sh
-hermes plugins install "https://github.com/reda-maizate/hermes-scaleway-provider#scaleway-provider" --ref <full-commit-sha>
+hermes plugins install "https://github.com/scaleway/hermes-scaleway-provider#scaleway-provider" --ref <full-commit-sha>
 ```
 
 ## Configure
@@ -111,4 +111,4 @@ every day.
 
 ## License
 
-MIT — see [the license file](https://github.com/reda-maizate/hermes-scaleway-provider/blob/main/LICENSE).
+MIT — see [the license file](https://github.com/scaleway/hermes-scaleway-provider/blob/main/LICENSE).
