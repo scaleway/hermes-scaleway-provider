@@ -33,12 +33,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # The minimum supported release joins here once it tags: the first release
-          # carrying the models_dev_id / ambient_credentials profile fields (added to
-          # Hermes main on 2026-10-25; released 0.21.5 does not have them). Until then
-          # main is the only ref that can load the plugin, and requires_hermes gates
-          # released versions out. Release tags sync with `--extra dev`, main with
-          # `--group dev`.
+          # v0.22.6 is the minimum supported release: the first carrying the
+          # models_dev_id / ambient_credentials profile fields (added to Hermes
+          # main on 2026-10-25; 0.22.0-0.22.5 do not have them — requires_hermes
+          # gates those out). Release tags and main both sync the `dev` group.
+          - ref: v0.22.6
+            sync: --group dev
           - ref: main
             sync: --group dev
     steps:

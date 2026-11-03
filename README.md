@@ -83,10 +83,11 @@ fallback list:
 
 ## Compatibility
 
-Hermes 0.22 or newer. The profile uses the `models_dev_id` and `ambient_credentials` plugin
-fields, added to Hermes on 2026-10-25; released versions up to 0.21.5 do not carry them, so the
-plugin's `requires_hermes` guard holds it back there instead of failing silently. CI runs the
-tests against Hermes `main` every day; the minimum release joins the CI matrix once it tags.
+Hermes 0.22.6 or newer. The profile uses the `models_dev_id` and `ambient_credentials` plugin
+fields, added to Hermes on 2026-10-25 and first released in v0.22.6; earlier releases (up to
+0.22.5) do not carry them, so the plugin's `requires_hermes` guard holds it back there instead
+of failing silently. CI runs the tests against Hermes `main` and the minimum release `v0.22.6`
+every day.
 
 ## Changelog
 
@@ -94,7 +95,8 @@ tests against Hermes `main` every day; the minimum release joins the CI matrix o
 
 - Plugin directory layout (`scaleway-provider/`): the installed payload is exactly the plugin;
   tests, fixtures and CI live around it.
-- `requires_hermes: ">=0.22"` and `optional_env: [SCALEWAY_BASE_URL]` in the manifest.
+- `requires_hermes: ">=0.22.6"` (v0.22.6 is the first release carrying the profile fields) and
+  `optional_env: [SCALEWAY_BASE_URL]` in the manifest.
 - Offline unit tests with a stub `providers` package; a recorded models.dev snapshot guarding
   the curated list; end-to-end tests against a real Hermes home using Hermes' own loopback LLM
   (nothing talks to Scaleway); packaging tests.

@@ -59,9 +59,10 @@ def test_manifest_declares_a_model_provider():
 
 def test_manifest_declares_its_hermes_floor():
     """The profile needs the models_dev_id and ambient_credentials fields (Hermes main,
-    2026-10-25); on older Hermes the loader would swallow a TypeError into a silent
-    "provider not found". Keep the floor in step with the first release that carries them."""
-    assert _manifest()["requires_hermes"] == ">=0.22"
+    2026-10-25, first released in v0.22.6). On older Hermes the loader would swallow a
+    TypeError into a silent "provider not found", so the floor must name the first
+    release that carries the fields — 0.22.0 through 0.22.5 do not."""
+    assert _manifest()["requires_hermes"] == ">=0.22.6"
 
 
 def test_manifest_env_vars_match_the_profile():
