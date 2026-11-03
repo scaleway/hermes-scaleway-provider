@@ -1,0 +1,12 @@
+name: scaleway-provider
+kind: model-provider
+version: 1.1.0
+description: Scaleway Generative APIs — European OpenAI-compatible inference
+author: Reda Maizate
+# The first release carrying the models_dev_id and ambient_credentials profile
+# fields (added to Hermes main on 2026-10-25). Confirm the number when it tags.
+requires_hermes: ">=0.22"
+requires_env:
+  - SCW_SECRET_KEY
+optional_env:
+  - SCALEWAY_BASE_URL

@@ -1,25 +1,75 @@
-"""Test harness: install this plugin into a throwaway Hermes home.
+"""Shared helpers: the plugin loaded against a stand-in ``providers`` package, and the recorded data.
 
-Runs before any test module imports hermes, so ``providers`` discovery (lazy, first
-``list_providers()``) scans the temp home with the plugin in it. ``HERMES_SOURCE`` points
-at a Hermes checkout to test against (default: a sibling ``hermes-agent`` directory);
-test against a clean ``main`` so the bundled tree cannot satisfy the assertions.
+The unit tests run without Hermes. ``load_plugin`` imports the plugin with small stand-ins for
+``providers`` and ``providers.base`` and restores ``sys.modules`` afterwards, so a real Hermes
+on the path (the end-to-end tests, or a developer checkout) is left untouched. A Hermes source
+checkout is located for the end-to-end module (``HERMES_SOURCE`` or a sibling ``hermes-agent``
+directory); without one, that module skips itself.
 """
-import os
-import shutil
+
+from __future__ import annotations
+
+import importlib.util
+import json
 import sys
-import tempfile
+import types
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-HERMES_SOURCE = Path(os.environ.get("HERMES_SOURCE", REPO_ROOT.parent / "hermes-agent")).resolve()
-if not (HERMES_SOURCE / "providers" / "base.py").is_file():
-    raise SystemExit(f"no Hermes source at {HERMES_SOURCE}; set HERMES_SOURCE to a checkout")
-sys.path.insert(0, str(HERMES_SOURCE))
+ROOT = Path(__file__).resolve().parents[1]
+PLUGIN_DIR = ROOT / "scaleway-provider"
+HERE = Path(__file__).resolve().parent
+# models.dev's `scaleway` provider row (context windows, pricing, tool-call/vision/reasoning
+# flags), recorded 2026-11-03 from https://models.dev/api.json.
+MODELS_DEV = json.loads((HERE / "scaleway_models_dev.json").read_text(encoding="utf-8"))
 
-_home = Path(tempfile.mkdtemp(prefix="scaleway-plugin-home-"))
-_plugin = _home / "plugins" / "scaleway-provider"
-_plugin.mkdir(parents=True)
-shutil.copy(REPO_ROOT / "__init__.py", _plugin / "__init__.py")
-shutil.copy(REPO_ROOT / "plugin.yaml", _plugin / "plugin.yaml")
-os.environ["HERMES_HOME"] = str(_home)
+
+class StubProfile:
+    """Stands in for ``providers.base.ProviderProfile``."""
+
+    def __init__(self, **fields):
+        self.__dict__.update(fields)
+
+
+def load_plugin():
+    """Import the plugin once against the stand-ins; returns (module, registered profiles)."""
+    registered: list = []
+    providers = types.ModuleType("providers")
+    providers.register_provider = registered.append
+    base = types.ModuleType("providers.base")
+    base.ProviderProfile = StubProfile
+    providers.base = base
+    saved = {name: sys.modules.get(name) for name in ("providers", "providers.base")}
+    sys.modules.update({"providers": providers, "providers.base": base})
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "scaleway_provider_under_test", PLUGIN_DIR / "__init__.py",
+            submodule_search_locations=[str(PLUGIN_DIR)])
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    finally:
+        for name, previous in saved.items():
+            if previous is None:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = previous
+    return module, registered
+
+
+plugin, registered_profiles = load_plugin()
+PROFILE = registered_profiles[0] if registered_profiles else None
+
+
+def _prepend_hermes_source() -> None:
+    """Make a Hermes checkout importable for the end-to-end module, when one is around.
+
+    CI passes PYTHONPATH; locally ``HERMES_SOURCE`` or a sibling ``hermes-agent`` works. Only the
+    path is prepared — nothing is imported here, so unit runs without Hermes stay fast.
+    """
+    import os
+
+    source = os.environ.get("HERMES_SOURCE") or str(ROOT.parent / "hermes-agent")
+    if (Path(source) / "hermes_cli" / "__init__.py").is_file() and source not in sys.path:
+        sys.path.insert(0, source)
+
+
+_prepend_hermes_source()

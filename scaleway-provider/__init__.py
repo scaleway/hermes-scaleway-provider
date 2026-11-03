@@ -1,8 +1,20 @@
-"""Scaleway Generative APIs provider profile.
+"""Scaleway Generative APIs as a Hermes model provider: ``--provider scaleway`` (alias ``scw``).
 
-Standalone Hermes model-provider plugin, discovered from
-``$HERMES_HOME/plugins/scaleway-provider/`` after a
-``hermes plugins install scaleway-provider`` (or a direct copy).
+The API is OpenAI-compatible, so it can be reached without a plugin — a hand-written
+``providers:`` custom block pointing at ``https://api.scaleway.ai/v1`` with
+``SCW_SECRET_KEY`` — but that keeps the generic-endpoint defaults: an assumed 256K context
+window instead of the model's real one (llama-3.3-70b-instruct has 100K,
+mistral-small-3.2-24b-instruct-2506 128K, so compression runs too late), no per-model pricing
+or reasoning/tool-call badges, no curated model list (the picker is the raw catalog, including
+models that cannot drive an agent over chat-completions, such as gpt-oss-120b, whose
+tool-calling Scaleway serves on the beta Responses API only), and no cheap auxiliary tier for
+compression and summaries.
+
+This profile keys models.dev's full ``scaleway`` row through ``models_dev_id``, so context
+windows, pricing and capability badges resolve with no in-tree declarations.
+``SCW_SECRET_KEY`` is the same secret key the Scaleway CLI and SDKs use; it is ambient
+(``ambient_credentials``), so the provider is never auto-detected and turns on only when
+explicitly selected. ``SCALEWAY_BASE_URL`` optionally overrides the default endpoint.
 """
 
 from providers import register_provider
